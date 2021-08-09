@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { Carousel, Flex } from "antd-mobile";
-import axios from "axios";
 
 import "./index.scss";
+import { getSwipers } from "../../api/dashboard";
 
 import Nav1 from "../../assets/images/nav-1.png";
 import Nav2 from "../../assets/images/nav-2.png";
@@ -65,12 +65,11 @@ class Dashboard extends Component<TypeRouter, State> {
     };
   }
 
-  getSwiperList(): void {
-    axios.get("http://localhost:9528/home/swiper").then((res) => {
-      this.setState({
-        swipers: res.data.body,
-        isSwpiersReady: true,
-      });
+  async getSwiperList() {
+    const res = await getSwipers();
+    this.setState({
+      swipers: res.data.body,
+      isSwpiersReady: true,
     });
   }
 
