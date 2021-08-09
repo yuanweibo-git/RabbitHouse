@@ -2,14 +2,14 @@ import React, { Component } from "react";
 import { Carousel, Flex } from "antd-mobile";
 
 import "./index.scss";
-import { getSwipers } from "../../api/dashboard";
+import { getSwipers } from "@/api/dashboard";
 
 import Nav1 from "../../assets/images/nav-1.png";
 import Nav2 from "../../assets/images/nav-2.png";
 import Nav3 from "../../assets/images/nav-3.png";
 import Nav4 from "../../assets/images/nav-4.png";
 
-import { TypeRouter } from "../../tsModels/assets";
+import { TypeRouter } from "@/tsModels/assets";
 
 type Swipers = {
   id: number;

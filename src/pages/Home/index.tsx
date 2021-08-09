@@ -9,7 +9,7 @@ import Dashboard from "../Dashboard";
 import HouseList from "../HouseList";
 import Profile from "../Profile";
 
-import { TypeRouter } from "../../tsModels/assets";
+import { TypeRouter } from "@/tsModels/assets";
 
 type State = {
   selectedTab: string;
