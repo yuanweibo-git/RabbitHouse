@@ -9,12 +9,8 @@ import Dashboard from "../Dashboard";
 import HouseList from "../HouseList";
 import Profile from "../Profile";
 
-// 引入类型声明
-import { RouterProps } from "react-router-dom";
-import * as H from "history";
+import { TypeRouter } from "../../tsModels/assets";
 
-// 定义类型声明
-type TypeRouter = H.History & RouterProps;
 type State = {
   selectedTab: string;
 };
@@ -71,6 +67,18 @@ class Home extends Component<TypeRouter, State> {
         }}
       />
     ));
+  }
+
+  componentDidUpdate(
+    prevProps: Readonly<TypeRouter>,
+    prevState: Readonly<State>,
+    snapshot?: any
+  ) {
+    if (prevProps.location.pathname !== this.props.location.pathname) {
+      this.setState({
+        selectedTab: this.props.location.pathname,
+      });
+    }
   }
 
   render() {
