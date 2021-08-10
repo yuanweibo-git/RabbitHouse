@@ -1,13 +1,13 @@
 import React, { Component } from "react";
-import { Carousel, Flex } from "antd-mobile";
+import { Carousel, Flex, Grid } from "antd-mobile";
 
 import "./index.scss";
-import { getSwipers } from "@/api/dashboard";
+import { getSwipers, getGroups } from "@/api/dashboard";
 
-import Nav1 from "../../assets/images/nav-1.png";
-import Nav2 from "../../assets/images/nav-2.png";
-import Nav3 from "../../assets/images/nav-3.png";
-import Nav4 from "../../assets/images/nav-4.png";
+import Nav1 from "@/assets/images/nav-1.png";
+import Nav2 from "@/assets/images/nav-2.png";
+import Nav3 from "@/assets/images/nav-3.png";
+import Nav4 from "@/assets/images/nav-4.png";
 
 import { TypeRouter } from "@/tsModels/assets";
 
@@ -17,8 +17,16 @@ type Swipers = {
   alt: string;
 };
 
+type Groups = {
+  desc: string;
+  id: number;
+  imgSrc: string;
+  title: string;
+};
+
 interface State {
   swipers: Swipers[];
+  groups: Groups[];
   isSwpiersReady: boolean;
 }
 
@@ -62,15 +70,8 @@ class Dashboard extends Component<TypeRouter, State> {
     this.state = {
       swipers: [],
       isSwpiersReady: false,
+      groups: [],
     };
-  }
-
-  async getSwiperList() {
-    const res = await getSwipers();
-    this.setState({
-      swipers: res.data.body,
-      isSwpiersReady: true,
-    });
   }
 
   /**
@@ -101,8 +102,14 @@ class Dashboard extends Component<TypeRouter, State> {
     ));
   }
 
-  componentWillMount() {
-    this.getSwiperList();
+  async componentWillMount() {
+    const swipers = await getSwipers();
+    const groups = await getGroups("AREA|88cff55c-aaa4-e2e0");
+    this.setState({
+      swipers: swipers.data.body,
+      groups: groups.data.body,
+      isSwpiersReady: true,
+    });
   }
 
   render() {
@@ -122,6 +129,21 @@ class Dashboard extends Component<TypeRouter, State> {
         {/*nav菜单*/}
         <div className="nav">
           <Flex className="nav">{this.renderNavs()}</Flex>
+        </div>
+
+        {/*租房小组*/}
+        <div className="groups">
+          <h3>
+            租房小组 <span>更多</span>
+          </h3>
+          <Grid
+            data={this.state.groups}
+            columnNum={2}
+            square={false}
+            renderItem={(item: Groups) => {
+              return <Flex className="groups-item">123</Flex>;
+            }}
+          />
         </div>
       </div>
     );
