@@ -14,3 +14,11 @@ export function getGroups(params: string) {
     params,
   });
 }
+
+export function getNews(params: string) {
+  return request({
+    url: "/home/news",
+    method: "get",
+    params,
+  });
+}

@@ -1,8 +1,8 @@
 import React, { Component } from "react";
-import { Carousel, Flex, Grid } from "antd-mobile";
+import { Carousel, Flex, Grid, WingBlank } from "antd-mobile";
 
 import "./index.scss";
-import { getSwipers, getGroups } from "@/api/dashboard";
+import { getSwipers, getGroups, getNews } from "@/api/dashboard";
 
 import Nav1 from "@/assets/images/nav-1.png";
 import Nav2 from "@/assets/images/nav-2.png";
@@ -24,9 +24,18 @@ type Groups = {
   title: string;
 };
 
+type News = {
+  date: string;
+  from: string;
+  id: number;
+  imgSrc: string;
+  title: string;
+};
+
 interface State {
   swipers: Swipers[];
   groups: Groups[];
+  news: News[];
   isSwpiersReady: boolean;
 }
 
@@ -69,6 +78,7 @@ class Dashboard extends Component<TypeRouter, State> {
     super(props);
     this.state = {
       swipers: [],
+      news: [],
       isSwpiersReady: false,
       groups: [],
     };
@@ -102,12 +112,35 @@ class Dashboard extends Component<TypeRouter, State> {
     ));
   }
 
+  /**
+   * @description 渲染最新资讯
+   * @returns {JSX.Element}
+   */
+  renderNews() {
+    return this.state.news.map((item) => (
+      <div key={item.id} className="news-wrapper">
+        <img src={`http://localhost:9528${item.imgSrc}`} alt="" />
+        <div className="news-text">
+          <Flex className="content" direction="column" justify="between">
+            <h3 className="title">{item.title}</h3>
+            <Flex className="context" justify="between">
+              <span>{item.from}</span>
+              <span>{item.date}</span>
+            </Flex>
+          </Flex>
+        </div>
+      </div>
+    ));
+  }
+
   async componentWillMount() {
     const swipers = await getSwipers();
     const groups = await getGroups("AREA|88cff55c-aaa4-e2e0");
+    const news = await getNews("AREA|88cff55c-aaa4-e2e0");
     this.setState({
       swipers: swipers.data.body,
       groups: groups.data.body,
+      news: news.data.body,
       isSwpiersReady: true,
     });
   }
@@ -132,18 +165,34 @@ class Dashboard extends Component<TypeRouter, State> {
         </div>
 
         {/*租房小组*/}
-        <div className="groups">
-          <h3>
-            租房小组 <span>更多</span>
+        <div className="groups" onContextMenu={(e) => e.preventDefault()}>
+          <h3 className="group-title">
+            租房小组
+            <span className="more">更多</span>
           </h3>
           <Grid
             data={this.state.groups}
             columnNum={2}
             square={false}
-            renderItem={(item: Groups) => {
-              return <Flex className="groups-item">123</Flex>;
+            hasLine={false}
+            renderItem={(item) => {
+              return (
+                <Flex className="group-item" justify="around" key={item?.id}>
+                  <div className="desc">
+                    <p className="title">{item?.title}</p>
+                    <span className="info">{item?.desc}</span>
+                  </div>
+                  <img src={`http://localhost:9528${item?.imgSrc}`} alt="" />
+                </Flex>
+              );
             }}
           />
+        </div>
+
+        {/*最新资讯*/}
+        <div className="news">
+          <h3>最新资讯</h3>
+          <WingBlank size="md">{this.renderNews()}</WingBlank>
         </div>
       </div>
     );
