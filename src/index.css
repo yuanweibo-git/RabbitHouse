@@ -6,6 +6,14 @@ body {
     background-color: #fff;
 }
 
+#root {
+    height: 100%;
+}
+
+.App {
+    height: 100%;
+}
+
 * {
     box-sizing: border-box;
     touch-action: pan-y;

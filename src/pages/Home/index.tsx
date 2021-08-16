@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { RouteComponentProps } from "react-router-dom";
 import { Route } from "react-router-dom";
 import { TabBar } from "antd-mobile";
 import "./index.scss";
@@ -8,8 +9,6 @@ import News from "../News";
 import Dashboard from "../Dashboard";
 import HouseList from "../HouseList";
 import Profile from "../Profile";
-
-import { TypeRouter } from "@/tsModels/assets";
 
 type State = {
   selectedTab: string;
@@ -44,7 +43,7 @@ const tabItems: tabList[] = [
   },
 ];
 
-class Home extends Component<TypeRouter, State> {
+class Home extends Component<RouteComponentProps, State> {
   state = {
     selectedTab: this.props.location.pathname,
   };
@@ -70,7 +69,7 @@ class Home extends Component<TypeRouter, State> {
   }
 
   componentDidUpdate(
-    prevProps: Readonly<TypeRouter>,
+    prevProps: Readonly<RouteComponentProps>,
     prevState: Readonly<State>,
     snapshot?: any
   ) {

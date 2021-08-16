@@ -1,15 +1,17 @@
 import React, { Component } from "react";
 import { Carousel, Flex, Grid, WingBlank } from "antd-mobile";
-
-import "./index.scss";
+import { RouteComponentProps } from "react-router-dom";
+import { Map } from "react-bmapgl";
+import { MapProps } from "react-bmapgl/Map";
 import { getSwipers, getGroups, getNews } from "@/api/dashboard";
+
+import SearchHeader from "@/components/SeachHeader";
 
 import Nav1 from "@/assets/images/nav-1.png";
 import Nav2 from "@/assets/images/nav-2.png";
 import Nav3 from "@/assets/images/nav-3.png";
 import Nav4 from "@/assets/images/nav-4.png";
-
-import { TypeRouter } from "@/tsModels/assets";
+import "./index.scss";
 
 type Swipers = {
   id: number;
@@ -32,11 +34,18 @@ type News = {
   title: string;
 };
 
+type Props = RouteComponentProps & {
+  map: MapProps;
+};
+
 interface State {
   swipers: Swipers[];
   groups: Groups[];
   news: News[];
   isSwpiersReady: boolean;
+  lng: number;
+  lat: number;
+  areaId: string;
 }
 
 interface Navs {
@@ -73,14 +82,17 @@ const navs: Navs[] = [
   },
 ];
 
-class Dashboard extends Component<TypeRouter, State> {
-  constructor(props: TypeRouter) {
+class Dashboard extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = {
       swipers: [],
       news: [],
       isSwpiersReady: false,
       groups: [],
+      lng: 116.404449,
+      lat: 39.914889,
+      areaId: "",
     };
   }
 
@@ -113,7 +125,7 @@ class Dashboard extends Component<TypeRouter, State> {
   }
 
   /**
-   * @description 渲染最新资讯
+   * @description 渲染资讯
    * @returns {JSX.Element}
    */
   renderNews() {
@@ -133,10 +145,32 @@ class Dashboard extends Component<TypeRouter, State> {
     ));
   }
 
+  /**
+   * @description 获取地区ID callBack
+   * @param data 地区ID
+   * @returns void
+   */
+  getAreaId = (data: string) => {
+    this.setState({ areaId: data });
+  };
+
   async componentWillMount() {
+    // 获取当前地理位置
+    navigator.geolocation.getCurrentPosition((position) => {
+      const {
+        coords: { longitude, latitude },
+      } = position;
+
+      this.setState({
+        lng: longitude,
+        lat: latitude,
+      });
+    });
+
     const swipers = await getSwipers();
-    const groups = await getGroups("AREA|88cff55c-aaa4-e2e0");
-    const news = await getNews("AREA|88cff55c-aaa4-e2e0");
+    const groups = await getGroups(this.state.areaId);
+    const news = await getNews(this.state.areaId);
+
     this.setState({
       swipers: swipers.data.body,
       groups: groups.data.body,
@@ -157,6 +191,14 @@ class Dashboard extends Component<TypeRouter, State> {
           ) : (
             ""
           )}
+
+          <Map
+            style={{ height: "0" }}
+            center={new BMapGL.Point(this.state.lng, this.state.lat)}
+            zoom={0}
+          >
+            <SearchHeader {...this.props} getAreaId={this.getAreaId} />
+          </Map>
         </div>
 
         {/*nav菜单*/}

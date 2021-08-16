@@ -63,6 +63,7 @@
     "prompts": "2.4.0",
     "react": "^17.0.2",
     "react-app-polyfill": "^2.0.0",
+    "react-bmapgl": "^0.1.26",
     "react-dev-utils": "^11.0.3",
     "react-dom": "^17.0.2",
     "react-refresh": "^0.8.3",
@@ -100,6 +101,7 @@
     ]
   },
   "devDependencies": {
+    "@types/bmapgl": "^0.0.4",
     "confusing-browser-globals": "^1.0.10"
   },
   "jest": {
