@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Carousel, Flex, Grid, WingBlank } from "antd-mobile";
 import { RouteComponentProps } from "react-router-dom";
-import { Map } from "react-bmapgl";
 import { MapProps } from "react-bmapgl/Map";
 import { getSwipers, getGroups, getNews } from "@/api/dashboard";
 
@@ -43,9 +42,7 @@ interface State {
   groups: Groups[];
   news: News[];
   isSwpiersReady: boolean;
-  lng: number;
-  lat: number;
-  areaId: string;
+  cityInfo: any;
 }
 
 interface Navs {
@@ -90,9 +87,7 @@ class Dashboard extends Component<Props, State> {
       news: [],
       isSwpiersReady: false,
       groups: [],
-      lng: 116.404449,
-      lat: 39.914889,
-      areaId: "",
+      cityInfo: {},
     };
   }
 
@@ -145,37 +140,19 @@ class Dashboard extends Component<Props, State> {
     ));
   }
 
-  /**
-   * @description 获取地区ID callBack
-   * @param data 地区ID
-   * @returns void
-   */
-  getAreaId = (data: string) => {
-    this.setState({ areaId: data });
-  };
-
   async componentWillMount() {
-    // 获取当前地理位置
-    navigator.geolocation.getCurrentPosition((position) => {
-      const {
-        coords: { longitude, latitude },
-      } = position;
-
-      this.setState({
-        lng: longitude,
-        lat: latitude,
-      });
-    });
+    const cityInfo = JSON.parse(localStorage.getItem("BH_CITY") as string);
 
     const swipers = await getSwipers();
-    const groups = await getGroups(this.state.areaId);
-    const news = await getNews(this.state.areaId);
+    const groups = await getGroups(cityInfo.value);
+    const news = await getNews(cityInfo.value);
 
     this.setState({
       swipers: swipers.data.body,
       groups: groups.data.body,
       news: news.data.body,
       isSwpiersReady: true,
+      cityInfo: cityInfo,
     });
   }
 
@@ -192,13 +169,7 @@ class Dashboard extends Component<Props, State> {
             ""
           )}
 
-          <Map
-            style={{ height: "0" }}
-            center={new BMapGL.Point(this.state.lng, this.state.lat)}
-            zoom={0}
-          >
-            <SearchHeader {...this.props} getAreaId={this.getAreaId} />
-          </Map>
+          <SearchHeader {...this.props} cityInfo={this.state.cityInfo} />
         </div>
 
         {/*nav菜单*/}

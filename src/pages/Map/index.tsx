@@ -35,7 +35,7 @@ class MapBox extends React.Component<Props, State> {
       <Map
         style={{ height: "100%" }}
         center={new BMapGL.Point(this.state.lng, this.state.lat)}
-        zoom={30}
+        zoom={15}
         tilt={40}
         enableScrollWheelZoom
       >

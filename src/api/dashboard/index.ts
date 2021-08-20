@@ -7,18 +7,22 @@ export function getSwipers() {
   });
 }
 
-export function getGroups(params: string) {
+export function getGroups(area: string) {
   return request({
     url: "/home/groups",
     method: "get",
-    params,
+    params: {
+      area,
+    },
   });
 }
 
-export function getNews(params: string) {
+export function getNews(area: string) {
   return request({
     url: "/home/news",
     method: "get",
-    params,
+    params: {
+      area,
+    },
   });
 }

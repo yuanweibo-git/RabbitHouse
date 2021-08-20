@@ -3,15 +3,18 @@ import { RouteComponentProps } from "react-router-dom";
 import { Route } from "react-router-dom";
 import { TabBar } from "antd-mobile";
 import "./index.scss";
-
+import { Map } from "react-bmapgl";
 // 引入组件
 import News from "../News";
 import Dashboard from "../Dashboard";
 import HouseList from "../HouseList";
 import Profile from "../Profile";
+import { getCityName } from "@/api/searchHeader";
 
 type State = {
   selectedTab: string;
+  lng: number;
+  lat: number;
 };
 
 interface tabList {
@@ -46,7 +49,23 @@ const tabItems: tabList[] = [
 class Home extends Component<RouteComponentProps, State> {
   state = {
     selectedTab: this.props.location.pathname,
+    lng: 0,
+    lat: 0,
   };
+
+  componentDidMount() {
+    // 获取当前地理位置
+    navigator.geolocation.getCurrentPosition((position) => {
+      const {
+        coords: { longitude, latitude },
+      } = position;
+
+      this.setState({
+        lng: longitude,
+        lat: latitude,
+      });
+    });
+  }
 
   /**
    * @description 渲染TabBar
@@ -83,6 +102,13 @@ class Home extends Component<RouteComponentProps, State> {
   render() {
     return (
       <div className="home">
+        <Map
+          style={{ height: 0 }}
+          center={new BMapGL.Point(this.state.lng, this.state.lat)}
+          zoom={0}
+        >
+          <GetLocation />
+        </Map>
         <Route exact path="/home" component={Dashboard} />
         <Route path="/home/list" component={HouseList} />
         <Route path="/home/news" component={News} />
@@ -98,6 +124,17 @@ class Home extends Component<RouteComponentProps, State> {
       </div>
     );
   }
+}
+
+function GetLocation(props: any) {
+  getCityName(props.map.cityName).then((res) => {
+    const {
+      data: { body },
+    } = res;
+
+    localStorage.setItem("BH_CITY", JSON.stringify(body));
+  });
+  return null;
 }
 
 export default Home;
