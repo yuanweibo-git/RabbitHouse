@@ -33,6 +33,13 @@ type News = {
   title: string;
 };
 
+interface Navs {
+  id: number;
+  img: string;
+  title: string;
+  path: string;
+}
+
 type Props = RouteComponentProps & {
   map: MapProps;
 };
@@ -42,14 +49,9 @@ interface State {
   groups: Groups[];
   news: News[];
   isSwpiersReady: boolean;
-  cityInfo: any;
-}
-
-interface Navs {
-  id: number;
-  img: string;
-  title: string;
-  path: string;
+  cityInfo: {
+    [key: string]: string;
+  };
 }
 
 const navs: Navs[] = [
