@@ -13,6 +13,7 @@ import { getCityName } from "@/api/searchHeader";
 
 type State = {
   selectedTab: string;
+  isCityReady: boolean;
   lng: number;
   lat: number;
 };
@@ -47,15 +48,24 @@ const tabItems: tabList[] = [
 ];
 
 class Home extends Component<RouteComponentProps, State> {
-  state = {
-    selectedTab: this.props.location.pathname,
-    lng: 0,
-    lat: 0,
-  };
+  private mapRefs: any;
 
-  componentDidMount() {
+  constructor(props: RouteComponentProps) {
+    super(props);
+
+    this.state = {
+      selectedTab: this.props.location.pathname,
+      isCityReady: false,
+      lng: 0,
+      lat: 0,
+    };
+
+    this.mapRefs = React.createRef();
+  }
+
+  async componentDidMount() {
     // 获取当前地理位置
-    navigator.geolocation.getCurrentPosition((position) => {
+    await navigator.geolocation.getCurrentPosition((position) => {
       const {
         coords: { longitude, latitude },
       } = position;
@@ -63,6 +73,21 @@ class Home extends Component<RouteComponentProps, State> {
       this.setState({
         lng: longitude,
         lat: latitude,
+      });
+    });
+
+    // 获取当前城市
+    const { cityName } = this.mapRefs.map;
+
+    getCityName(cityName).then((res) => {
+      const {
+        data: { body },
+      } = res;
+
+      localStorage.setItem("BH_CITY", JSON.stringify(body));
+
+      this.setState({
+        isCityReady: true,
       });
     });
   }
@@ -92,6 +117,7 @@ class Home extends Component<RouteComponentProps, State> {
     prevState: Readonly<State>,
     snapshot?: any
   ) {
+    // 修复TabBar切换页面不改变状态
     if (prevProps.location.pathname !== this.props.location.pathname) {
       this.setState({
         selectedTab: this.props.location.pathname,
@@ -103,13 +129,19 @@ class Home extends Component<RouteComponentProps, State> {
     return (
       <div className="home">
         <Map
+          ref={(ref: any) => {
+            this.mapRefs = ref;
+          }}
           style={{ height: 0 }}
           center={new BMapGL.Point(this.state.lng, this.state.lat)}
           zoom={0}
-        >
-          <GetLocation />
-        </Map>
-        <Route exact path="/home" component={Dashboard} />
+        />
+
+        {this.state.isCityReady ? (
+          <Route exact path="/home" component={Dashboard} />
+        ) : (
+          ""
+        )}
         <Route path="/home/list" component={HouseList} />
         <Route path="/home/news" component={News} />
         <Route path="/home/profile" component={Profile} />
@@ -124,17 +156,6 @@ class Home extends Component<RouteComponentProps, State> {
       </div>
     );
   }
-}
-
-function GetLocation(props: any) {
-  getCityName(props.map.cityName).then((res) => {
-    const {
-      data: { body },
-    } = res;
-
-    localStorage.setItem("BH_CITY", JSON.stringify(body));
-  });
-  return null;
 }
 
 export default Home;
