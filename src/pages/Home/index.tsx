@@ -76,21 +76,33 @@ class Home extends Component<RouteComponentProps, State> {
       });
     });
 
-    // 获取当前城市
+    this.getCurrentCityName();
+  }
+
+  // 获取当前城市
+  getCurrentCityName = () => {
     const { cityName } = this.mapRefs.map;
 
-    getCityName(cityName).then((res) => {
-      const {
-        data: { body },
-      } = res;
+    const location = JSON.parse(localStorage.getItem("BH_CITY") as string);
 
-      localStorage.setItem("BH_CITY", JSON.stringify(body));
+    if (!location) {
+      getCityName(cityName).then((res) => {
+        const {
+          data: { body },
+        } = res;
 
+        localStorage.setItem("BH_CITY", JSON.stringify(body));
+
+        this.setState({
+          isCityReady: true,
+        });
+      });
+    } else {
       this.setState({
         isCityReady: true,
       });
-    });
-  }
+    }
+  };
 
   /**
    * @description 渲染TabBar
