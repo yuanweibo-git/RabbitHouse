@@ -3,7 +3,7 @@ import { RouteComponentProps } from "react-router-dom";
 import { ListRowProps } from "react-virtualized/dist/es/List";
 import { RenderedRows } from "react-virtualized/dist/es/List";
 
-import { NavBar, Toast } from "antd-mobile";
+import { NavBar, Toast, Icon } from "antd-mobile";
 import { List, AutoSizer } from "react-virtualized";
 
 import { getCityHot, getCityList } from "@/api/cityList";
@@ -173,6 +173,12 @@ class CityList extends Component<RouteComponentProps, State> {
         >
           城市选择
         </NavBar>
+
+        {this.state.cityIndex.length === 0 ? (
+          <Icon className="loading" size="lg" type="loading" />
+        ) : (
+          ""
+        )}
 
         {/*左侧城市列表*/}
         <AutoSizer>
