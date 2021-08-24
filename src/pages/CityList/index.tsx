@@ -3,8 +3,9 @@ import { RouteComponentProps } from "react-router-dom";
 import { ListRowProps } from "react-virtualized/dist/es/List";
 import { RenderedRows } from "react-virtualized/dist/es/List";
 
-import { NavBar, Toast, Icon } from "antd-mobile";
+import { Toast, Icon } from "antd-mobile";
 import { List, AutoSizer } from "react-virtualized";
+import NavHeader from "@/components/NavHeader";
 
 import { getCityHot, getCityList } from "@/api/cityList";
 import "./index.scss";
@@ -89,7 +90,13 @@ class CityList extends Component<RouteComponentProps, State> {
     const fixCityList = this.state.cityList.hot.map((item) => item.label);
 
     if (fixCityList.some((item) => item === label)) {
-      localStorage.setItem("BH_CITY", JSON.stringify({ label, value }));
+      localStorage.setItem(
+        "BH_CITY",
+        JSON.stringify({
+          label,
+          value,
+        })
+      );
       this.props.history.go(-1);
     } else {
       Toast.info("没有当前城市数据", 3, () => {}, false);
@@ -165,14 +172,7 @@ class CityList extends Component<RouteComponentProps, State> {
   render() {
     return (
       <div className="city">
-        <NavBar
-          className="navbar"
-          mode="light"
-          icon={<i className="iconfont icon-back" />}
-          onLeftClick={() => this.props.history.go(-1)}
-        >
-          城市选择
-        </NavBar>
+        <NavHeader {...this.props} title="城市选择" />
 
         {this.state.cityIndex.length === 0 ? (
           <Icon className="loading" size="lg" type="loading" />
