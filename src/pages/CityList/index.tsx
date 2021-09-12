@@ -68,7 +68,7 @@ class CityList extends Component<RouteComponentProps, State> {
 
     const { data } = await getCityHot();
 
-    const cityInfo = JSON.parse(localStorage.getItem("BH_CITY") as string);
+    const cityInfo = JSON.parse(localStorage.getItem("CURRENT_CITY") as string);
 
     cityList["hot"] = data.body;
     cityList["#"] = [cityInfo];

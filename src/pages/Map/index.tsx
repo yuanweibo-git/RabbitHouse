@@ -1,54 +1,31 @@
 import React from "react";
-import { Map, NavigationControl } from "react-bmapgl";
-import { MapChildrenProps } from "react-bmapgl/common";
 import { RouteComponentProps } from "react-router-dom";
+import { getCurrentCity } from "@/utils";
 
 import NavHeader from "@/components/NavHeader";
 
 import "./index.scss";
 
-type Props = MapChildrenProps & RouteComponentProps & {};
+type Props = RouteComponentProps & {};
 type State = {
   lng: number;
   lat: number;
 };
 
 class MapBox extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      lng: 116.404449,
-      lat: 39.914889,
-    };
-  }
-
   componentDidMount() {
-    navigator.geolocation.getCurrentPosition((position) => {
-      const {
-        coords: { longitude, latitude },
-      } = position;
+    const map = new BMapGL.Map("container");
 
-      this.setState({
-        lng: longitude,
-        lat: latitude,
-      });
-    });
+    const point = new BMapGL.Point(116.331398, 39.897445);
+    map.centerAndZoom(point, 11);
+    getCurrentCity();
   }
 
   render() {
     return (
       <div className="map">
         <NavHeader {...this.props} title="地图找房" />
-
-        <Map
-          style={{ height: "100%" }}
-          center={new BMapGL.Point(this.state.lng, this.state.lat)}
-          zoom={15}
-          tilt={40}
-          enableScrollWheelZoom
-        >
-          <NavigationControl map={this.props.map} />
-        </Map>
+        <div id="container" />
       </div>
     );
   }

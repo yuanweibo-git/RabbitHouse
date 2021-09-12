@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Carousel, Flex, Grid, WingBlank } from "antd-mobile";
 import { RouteComponentProps } from "react-router-dom";
-import { MapProps } from "react-bmapgl/Map";
 import { getSwipers, getGroups, getNews } from "@/api/dashboard";
 
 import SearchHeader from "@/components/SeachHeader";
@@ -40,9 +39,7 @@ interface Navs {
   path: string;
 }
 
-type Props = RouteComponentProps & {
-  map: MapProps;
-};
+type Props = RouteComponentProps;
 
 interface State {
   swipers: Swipers[];
