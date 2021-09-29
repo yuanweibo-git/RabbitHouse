@@ -1,5 +1,6 @@
 import request from "@/utils/request";
 
+// 获取轮播图
 export function getSwipers() {
   return request({
     url: "/home/swiper",
@@ -7,6 +8,7 @@ export function getSwipers() {
   });
 }
 
+// 获取租房小组数据
 export function getGroups(area: string) {
   return request({
     url: "/home/groups",
@@ -17,6 +19,7 @@ export function getGroups(area: string) {
   });
 }
 
+// 获取热点新闻
 export function getNews(area: string) {
   return request({
     url: "/home/news",
