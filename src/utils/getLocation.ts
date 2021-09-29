@@ -10,7 +10,7 @@ function getCurrentCity() {
         try {
           const result = await getCityName(res.name);
 
-          localStorage.setItem("hkzf_city", JSON.stringify(result.data.body));
+          localStorage.setItem("BH_CITY", JSON.stringify(result.data.body));
           resolve(result.data.body);
         } catch (e) {
           reject(e);
