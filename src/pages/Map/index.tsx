@@ -1,24 +1,227 @@
 import React from "react";
 import { RouteComponentProps } from "react-router-dom";
-import { getCurrentCity } from "@/utils";
+import { AxiosResponse } from "axios";
 
 import NavHeader from "@/components/NavHeader";
 
 import "./index.scss";
 
+import { getHouseData } from "@/api/map";
+
+type HouseItems = {
+  coord: { latitude: number; longitude: number };
+  count: number;
+  label: string;
+  value: string;
+};
+
+type Response = AxiosResponse<{
+  body: HouseItems[];
+  description: string;
+  status: number;
+}>;
+
 type Props = RouteComponentProps & {};
-type State = {
-  lng: number;
-  lat: number;
+type State = {};
+
+const labelStyle: { [key: string]: string } = {
+  cursor: "pointer",
+  border: "0px solid rgb(255, 0, 0)",
+  padding: "0px",
+  whiteSpace: "nowrap",
+  fontSize: "12px",
+  color: "rgb(255, 255, 255)",
+  textAlign: "center",
 };
 
 class MapBox extends React.Component<Props, State> {
-  componentDidMount() {
-    const map = new BMapGL.Map("container");
+  private map: any;
 
-    const point = new BMapGL.Point(116.331398, 39.897445);
-    map.centerAndZoom(point, 11);
-    getCurrentCity();
+  async componentDidMount() {
+    this.initMap();
+  }
+
+  initMap() {
+    const { label, value } = JSON.parse(
+      localStorage.getItem("BH_CITY") as string
+    );
+
+    // 初始化地图
+    this.map = new BMapGL.Map("container");
+
+    // 创建地址解析器实例
+    const myGeo = new BMapGL.Geocoder();
+    myGeo.getPoint(
+      label,
+      async (point) => {
+        if (point) {
+          //  初始化地图
+          this.map.centerAndZoom(point, 11);
+
+          // 比例尺控件
+          this.map.addControl(new BMapGL.ScaleControl());
+          // 缩放控件
+          this.map.addControl(new BMapGL.ZoomControl());
+
+          // 调用 renderOverlays 方法
+          await this.renderOverlays(value);
+        }
+      },
+      label
+    );
+  }
+
+  /**
+   * @description 加载覆盖物信息
+   * @param id
+   * @returns null
+   */
+  async renderOverlays(id: string) {
+    const {
+      data: { body: houseList },
+    }: Response = await getHouseData(id);
+
+    const { nextZoom, type } = this.getTypeAndZoom();
+
+    houseList.reverse().forEach((item) => {
+      this.createOverlays(item, nextZoom, type);
+    });
+  }
+
+  /**
+   * @description 获取缩放比例并设置类型
+   * @returns {nextZoom, type}
+   */
+  getTypeAndZoom() {
+    const zoom = this.map.getZoom();
+    console.log("当前缩放级别", zoom);
+
+    let nextZoom: number = zoom,
+      type: string = "circle";
+
+    // 判断地图缩放级别
+    if (zoom >= 10 && zoom < 12) {
+      nextZoom = 13;
+      type = "circle";
+    } else if (zoom >= 12 && zoom < 14) {
+      nextZoom = 15;
+      type = "circle";
+    } else if (zoom >= 14 && zoom < 16) {
+      type = "rect";
+    }
+
+    return {
+      nextZoom,
+      type,
+    };
+  }
+
+  /**
+   * @description 判断渲染哪种类型数据
+   * @param data
+   * @param zoom
+   * @param type
+   */
+  createOverlays(data: HouseItems, zoom: number, type: string): void {
+    const {
+      coord: { longitude, latitude },
+      label: areaName,
+      count,
+      value,
+    } = data;
+
+    const point = new BMapGL.Point(longitude, latitude);
+
+    if (type === "circle") {
+      this.createCircle(point, areaName, count, value, zoom);
+    } else {
+      this.createRect(point, areaName, count, value);
+    }
+  }
+
+  /**
+   * @description 渲染圆形覆盖物
+   * @param point
+   * @param areaName
+   * @param count
+   * @param value
+   * @param zoom
+   */
+  createCircle(
+    point: BMapGL.Point,
+    areaName: string,
+    count: number,
+    value: string,
+    zoom: number
+  ) {
+    const label: BMapGL.Label = new BMapGL.Label("", {
+      position: point,
+      offset: new BMapGL.Size(-35, -35),
+    });
+
+    label.id = value;
+
+    // 设置覆盖物结构
+    label.setContent(`
+            <div class="bubble">
+              <p class="name">${areaName}</p>
+              <p>${count}套</p>
+            </div>
+          `);
+
+    // 设置覆盖物样式
+    label.setStyle(labelStyle);
+
+    // 添加单击事件
+    label.addEventListener("click", () => {
+      this.renderOverlays(value);
+      this.map.centerAndZoom(point, zoom);
+
+      // 清除当前覆盖物信息
+      this.map.clearOverlays();
+    });
+
+    this.map.addOverlay(label);
+  }
+
+  /**
+   * @description 渲染方形覆盖物
+   * @param point
+   * @param areaName
+   * @param count
+   * @param value
+   */
+  createRect(
+    point: BMapGL.Point,
+    areaName: string,
+    count: number,
+    value: string
+  ) {
+    const label: BMapGL.Label = new BMapGL.Label("", {
+      position: point,
+      offset: new BMapGL.Size(-50, -35),
+    });
+
+    label.id = value;
+
+    // 设置覆盖物结构
+    label.setContent(`
+           <div class="rect">
+              <span class="housename">${areaName}</span>
+              <span class="housenum">${count}套</span>
+              <i class="arrow"></i>
+          </div>
+        `);
+
+    // 设置覆盖物样式
+    label.setStyle(labelStyle);
+
+    // 添加单击事件
+    label.addEventListener("click", () => {
+      this.map.centerAndZoom(point, 15);
+    });
+
+    this.map.addOverlay(label);
   }
 
   render() {
