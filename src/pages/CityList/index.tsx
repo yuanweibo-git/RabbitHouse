@@ -16,6 +16,8 @@ import {
   NAME_HEIGHT,
 } from "./utils";
 
+import { getCityName } from "@/api/searchHeader";
+
 export type CityData = {
   label: string;
   pinyin: string;
@@ -48,7 +50,7 @@ class CityList extends Component<RouteComponentProps, State> {
   }
 
   async componentDidMount() {
-    await this.getCityList();
+    await this.initCityList();
 
     // 计算行高度，保证在第一次渲染的时候，点击右侧导航栏跳转精度问题；
     // 需要在有List数据之后调用
@@ -59,14 +61,18 @@ class CityList extends Component<RouteComponentProps, State> {
    * @description 通过接口获取城市数据
    * @returns void
    */
-  async getCityList() {
+  async initCityList() {
     const {
-      data: { body },
+      data: { body: allCityList },
     } = await getCityList(1);
 
-    const { cityList, cityIndex } = formatCityList(body);
-
+    const { cityList, cityIndex } = formatCityList(allCityList);
     const { data } = await getCityHot();
+
+    new BMapGL.LocalCity().get(async (res: any) => {
+      const result = await getCityName(res.name);
+      localStorage.setItem("CURRENT_CITY", JSON.stringify(result.data.body));
+    });
 
     const cityInfo = JSON.parse(localStorage.getItem("CURRENT_CITY") as string);
 
@@ -108,10 +114,10 @@ class CityList extends Component<RouteComponentProps, State> {
    * @param {index} 当前索引
    * @returns {number} 高度
    */
-  getRowHeight({ index }: any): number {
+  getRowHeight = ({ index }: any): number => {
     const { cityList, cityIndex } = this.state;
     return TITLE_HEIGHT + cityList[cityIndex[index]].length * NAME_HEIGHT + 30;
-  }
+  };
 
   /**
    * @description 渲染每一行的数据
@@ -189,7 +195,7 @@ class CityList extends Component<RouteComponentProps, State> {
               height={height}
               onRowsRendered={this.getRowIndex}
               rowCount={this.state.cityIndex.length}
-              rowHeight={this.getRowHeight.bind(this)}
+              rowHeight={this.getRowHeight}
               rowRenderer={this.rowRenderer}
               scrollToAlignment="start"
             />
