@@ -1,12 +1,14 @@
 import React from "react";
 import { RouteComponentProps } from "react-router-dom";
-import { AxiosResponse } from "axios";
+import { Link } from "react-router-dom";
+import { Icon, Toast } from "antd-mobile";
+import { BASE_URL } from "@/utils/url";
 
 import NavHeader from "@/components/NavHeader";
 
 import "./index.scss";
 
-import { getHouseData } from "@/api/map";
+import { getHouseList, getHouseInfo } from "@/api/map";
 
 type HouseItems = {
   coord: { latitude: number; longitude: number };
@@ -15,14 +17,21 @@ type HouseItems = {
   value: string;
 };
 
-type Response = AxiosResponse<{
-  body: HouseItems[];
-  description: string;
-  status: number;
-}>;
+type HouseInfoItems = {
+  desc: string;
+  houseCode: string;
+  houseImg: string;
+  price: number;
+  title: string;
+  tags: string[];
+};
 
 type Props = RouteComponentProps & {};
-type State = {};
+
+type State = {
+  houseInfoList: HouseInfoItems[];
+  isShowHouseList: boolean;
+};
 
 const labelStyle: { [key: string]: string } = {
   cursor: "pointer",
@@ -36,6 +45,15 @@ const labelStyle: { [key: string]: string } = {
 
 class MapBox extends React.Component<Props, State> {
   private map: any;
+
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      houseInfoList: [],
+      isShowHouseList: false,
+    };
+  }
 
   async componentDidMount() {
     this.initMap();
@@ -69,6 +87,15 @@ class MapBox extends React.Component<Props, State> {
       },
       label
     );
+
+    // 给地图绑定移动事件
+    this.map.addEventListener("movestart", () => {
+      if (this.state.isShowHouseList) {
+        this.setState({
+          isShowHouseList: false,
+        });
+      }
+    });
   }
 
   /**
@@ -77,15 +104,23 @@ class MapBox extends React.Component<Props, State> {
    * @returns null
    */
   async renderOverlays(id: string) {
-    const {
-      data: { body: houseList },
-    }: Response = await getHouseData(id);
+    try {
+      Toast.loading("加载中", 0, () => {}, true);
 
-    const { nextZoom, type } = this.getTypeAndZoom();
+      const {
+        data: { body: houseList },
+      } = await getHouseList(id);
 
-    houseList.reverse().forEach((item) => {
-      this.createOverlays(item, nextZoom, type);
-    });
+      const { nextZoom, type } = this.getTypeAndZoom();
+
+      houseList.reverse().forEach((item: HouseItems) => {
+        this.createOverlays(item, nextZoom, type);
+      });
+
+      Toast.hide();
+    } catch (e) {
+      Toast.hide();
+    }
   }
 
   /**
@@ -94,7 +129,6 @@ class MapBox extends React.Component<Props, State> {
    */
   getTypeAndZoom() {
     const zoom = this.map.getZoom();
-    console.log("当前缩放级别", zoom);
 
     let nextZoom: number = zoom,
       type: string = "circle";
@@ -217,11 +251,48 @@ class MapBox extends React.Component<Props, State> {
     label.setStyle(labelStyle);
 
     // 添加单击事件
-    label.addEventListener("click", () => {
-      this.map.centerAndZoom(point, 15);
+    label.addEventListener("click", async (e) => {
+      const { clientX, clientY } = e.domEvent.changedTouches[0];
+
+      this.map.panBy(
+        window.innerWidth / 2 - clientX,
+        (window.innerHeight - 310) / 2 - clientY
+      );
+
+      e.currentTarget.domElement.children[0].className += " move_rect";
+
+      setTimeout(() => {
+        e.currentTarget.domElement.children[0].className = "rect";
+      }, 1000);
+
+      // 获取小区房屋详情
+      await this.getHouseInfo(value);
+
+      // this.map.centerAndZoom(point, 15);
     });
 
     this.map.addOverlay(label);
+  }
+
+  /**
+   * @description 获取房源详情
+   * @param id
+   */
+  async getHouseInfo(id: string) {
+    try {
+      Toast.loading("加载中", 0, () => {}, true);
+
+      const { data } = await getHouseInfo(id);
+
+      this.setState(() => ({
+        houseInfoList: data.body.list,
+        isShowHouseList: true,
+      }));
+
+      Toast.hide();
+    } catch (e) {
+      Toast.hide();
+    }
   }
 
   render() {
@@ -229,6 +300,49 @@ class MapBox extends React.Component<Props, State> {
       <div className="map">
         <NavHeader {...this.props} title="地图找房" />
         <div id="container" />
+
+        {/*房源详情弹出层*/}
+        <div
+          className={[
+            "house_info",
+            this.state.isShowHouseList ? "show_house_info" : "",
+          ].join(" ")}
+        >
+          {/*标题栏*/}
+          <div className="title_wrapper">
+            <h1 className="list">房屋列表</h1>
+            <Link className="more" to="/home/list">
+              更多房源
+              <Icon type="right" />
+            </Link>
+          </div>
+
+          {/*内容详情*/}
+          <div className="houseItems">
+            {/* 房屋结构 */}
+            {this.state.houseInfoList.map((item) => (
+              <div className="house" key={item.houseCode}>
+                <div className="imgWrap">
+                  <img className="img" src={BASE_URL + item.houseImg} alt="" />
+                </div>
+                <div className="content">
+                  <h3 className="title">{item.title}</h3>
+                  <div className="desc">{item.desc}</div>
+                  <div>
+                    {item.tags.map((tag) => (
+                      <span className="tag" key={tag}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="price">
+                    <span className="priceNum">{item.price}</span> 元/月
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
