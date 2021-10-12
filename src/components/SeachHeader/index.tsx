@@ -5,9 +5,7 @@ import { Flex } from "antd-mobile";
 import "./index.scss";
 
 type Props = RouteComponentProps & {
-  cityInfo: {
-    [key: string]: string;
-  };
+  cityName: string;
 };
 
 export class SearchHeader extends React.Component<Props> {
@@ -23,7 +21,7 @@ export class SearchHeader extends React.Component<Props> {
             className="location"
             onClick={() => this.props.history.push("city-list")}
           >
-            <span>{this.props.cityInfo.label}</span>
+            <span>{this.props.cityName}</span>
             <i className="iconfont icon-arrow" />
           </div>
 

@@ -47,10 +47,9 @@ interface State {
   groups: Groups[];
   news: News[];
   isSwpiersReady: boolean;
-  cityInfo: {
-    [key: string]: string;
-  };
 }
+
+const cityInfo = JSON.parse(localStorage.getItem("BH_CITY") as string);
 
 const navs: Navs[] = [
   {
@@ -87,7 +86,6 @@ class Dashboard extends Component<Props, State> {
       news: [],
       isSwpiersReady: false,
       groups: [],
-      cityInfo: {},
     };
   }
 
@@ -141,8 +139,6 @@ class Dashboard extends Component<Props, State> {
   }
 
   async componentWillMount() {
-    const cityInfo = JSON.parse(localStorage.getItem("BH_CITY") as string);
-
     const swipers = await getSwipers();
     const groups = await getGroups(cityInfo.value);
     const news = await getNews(cityInfo.value);
@@ -152,7 +148,6 @@ class Dashboard extends Component<Props, State> {
       groups: groups.data.body,
       news: news.data.body,
       isSwpiersReady: true,
-      cityInfo: cityInfo,
     });
   }
 
@@ -169,7 +164,7 @@ class Dashboard extends Component<Props, State> {
             ""
           )}
 
-          <SearchHeader {...this.props} cityInfo={this.state.cityInfo} />
+          <SearchHeader {...this.props} cityName={cityInfo.label} />
         </div>
 
         {/*nav菜单*/}
