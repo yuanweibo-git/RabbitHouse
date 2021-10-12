@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Carousel, Flex, Grid, WingBlank } from "antd-mobile";
 import { RouteComponentProps } from "react-router-dom";
 import { getSwipers, getGroups, getNews } from "@/api/dashboard";
+import { BASE_URL } from "@/utils/url";
 
 import SearchHeader from "@/components/SeachHeader";
 
@@ -97,7 +98,7 @@ class Dashboard extends Component<Props, State> {
   renderSwipers() {
     return this.state.swipers.map((item) => (
       <div className="swiper" key={item.id}>
-        <img src={`http://localhost:9528${item.imgSrc}`} alt={item.alt} />
+        <img src={BASE_URL + item.imgSrc} alt={item.alt} />
       </div>
     ));
   }
@@ -125,7 +126,7 @@ class Dashboard extends Component<Props, State> {
   renderNews() {
     return this.state.news.map((item) => (
       <div key={item.id} className="news-wrapper">
-        <img src={`http://localhost:9528${item.imgSrc}`} alt="" />
+        <img src={BASE_URL + item.imgSrc} alt="" />
         <div className="news-text">
           <Flex className="content" direction="column" justify="between">
             <h3 className="title">{item.title}</h3>
@@ -194,7 +195,7 @@ class Dashboard extends Component<Props, State> {
                     <p className="title">{item?.title}</p>
                     <span className="info">{item?.desc}</span>
                   </div>
-                  <img src={`http://localhost:9528${item?.imgSrc}`} alt="" />
+                  <img src={BASE_URL + item?.imgSrc} alt="" />
                 </Flex>
               );
             }}
