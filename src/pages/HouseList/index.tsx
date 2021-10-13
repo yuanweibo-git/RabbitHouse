@@ -1,8 +1,28 @@
 import React, { Component } from "react";
+import { RouteComponentProps } from "react-router-dom";
+import { Flex } from "antd-mobile";
+import SearchHeader from "@/components/SeachHeader";
 
-class HouseList extends Component {
+import "./index.scss";
+
+type Props = RouteComponentProps;
+
+const { label } = JSON.parse(localStorage.getItem("BH_CITY") as string);
+
+class HouseList extends Component<Props> {
   render() {
-    return <div>房屋列表</div>;
+    return (
+      <div className="house_list_main">
+        <Flex className="page_header">
+          <i className="iconfont icon-back" />
+          <SearchHeader
+            cityName={label}
+            className="search_header"
+            {...this.props}
+          />
+        </Flex>
+      </div>
+    );
   }
 }
 
