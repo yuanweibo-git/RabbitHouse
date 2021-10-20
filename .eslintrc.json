@@ -37,8 +37,8 @@
       }
     ],
     "indent": [
-      "error",
-      2,
+      "off",
+      0,
       {
         "SwitchCase": 1
       }
