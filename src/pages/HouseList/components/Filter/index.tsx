@@ -62,8 +62,6 @@ class Filter extends Component<Props, State> {
     const { value } = JSON.parse(localStorage.getItem("BH_CITY") as string);
     const res = await getCondition(value);
 
-    console.log(res.data.body);
-
     this.setState({
       filtersData: res.data.body,
     });
@@ -91,9 +89,9 @@ class Filter extends Component<Props, State> {
       newTitleSelectedStatus[type] = true;
     } else if (type === "price" && selectedVal[0] !== "null") {
       newTitleSelectedStatus[type] = true;
-    } else {
-      newTitleSelectedStatus[type] = false;
-    }
+    } else
+      newTitleSelectedStatus[type] =
+        type === "more" && selectedVal.length !== 0;
 
     return newTitleSelectedStatus;
   }
@@ -125,9 +123,9 @@ class Filter extends Component<Props, State> {
         newTitleSelectedStatus[key] = true;
       } else if (key === "price" && selectedVal[0] !== "null") {
         newTitleSelectedStatus[key] = true;
-      } else {
-        newTitleSelectedStatus[key] = false;
-      }
+      } else
+        newTitleSelectedStatus[key] =
+          key === "more" && selectedVal.length !== 0;
     });
 
     this.setState({
@@ -146,6 +144,21 @@ class Filter extends Component<Props, State> {
       openType: "",
       titleSelectedStatus: newTitleSelectedStatus,
     });
+  };
+
+  /**
+   * @description 清除更多筛选条件中父组件的数据
+   * @param type
+   */
+  onClearMoreData = (type: string) => {
+    if (type === "more") {
+      this.setState({
+        selectedValues: {
+          ...this.state.selectedValues,
+          [type]: [],
+        },
+      });
+    }
   };
 
   /**
@@ -214,12 +227,17 @@ class Filter extends Component<Props, State> {
     );
   }
 
+  /**
+   * @description 渲染FilterPMore组件
+   */
   renderFilterMore() {
     const {
       openType,
       filtersData: { roomType, oriented, floor, characteristic },
       selectedValues,
     } = this.state;
+
+    const defaultValue = selectedValues[openType];
 
     const data = {
       roomType,
@@ -232,7 +250,16 @@ class Filter extends Component<Props, State> {
       return;
     }
 
-    return <FilterMore data={data} />;
+    return (
+      <FilterMore
+        onPickerClose={this.onPickerClose}
+        data={data}
+        type={openType}
+        onSave={this.onSave}
+        onClearMoreData={this.onClearMoreData}
+        defaultValue={defaultValue}
+      />
+    );
   }
 
   render() {

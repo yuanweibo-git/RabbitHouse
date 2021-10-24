@@ -6,17 +6,24 @@ import "./index.scss";
 
 type Props = {
   data: any;
+  type: string;
+  onPickerClose: (type: string) => void;
+  onClearMoreData: (type: string) => void;
+  onSave: (type: string, value: any[]) => void;
+  defaultValue: any[];
 };
 
 type State = {
-  selectValues: boolean[];
+  selectValues: string[];
+  clearTextStatus: string;
 };
 
 export default class FilterMore extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      selectValues: [],
+      selectValues: this.props.defaultValue,
+      clearTextStatus: this.props.defaultValue.length ? "清除" : "关闭",
     };
   }
 
@@ -25,7 +32,53 @@ export default class FilterMore extends Component<Props, State> {
    * @param value 当前点击标签的value
    */
   onTagClick = (value: string) => {
-    console.log(value);
+    const { selectValues } = this.state;
+
+    const newSelectValues: string[] = JSON.parse(JSON.stringify(selectValues));
+
+    const currentValue = newSelectValues.find((item) => item === value);
+
+    if (!currentValue) {
+      newSelectValues.push(value);
+    } else {
+      const index = newSelectValues.findIndex((item) => item === value);
+      newSelectValues.splice(index, 1);
+    }
+
+    if (!newSelectValues.length) {
+      this.setState({
+        clearTextStatus: "关闭",
+      });
+    } else {
+      this.setState({
+        clearTextStatus: "清除",
+      });
+    }
+
+    this.setState({
+      selectValues: newSelectValues,
+    });
+  };
+
+  /**
+   * @description 点击清除按钮
+   */
+  onClear = () => {
+    const { type, onPickerClose, onClearMoreData } = this.props;
+    const { clearTextStatus } = this.state;
+
+    if (clearTextStatus === "清除") {
+      // 清除更多筛选条件中父组件的数据
+      onClearMoreData(type);
+
+      this.setState({
+        selectValues: [],
+        clearTextStatus: "关闭",
+      });
+      return;
+    }
+
+    onPickerClose(type);
   };
 
   /**
@@ -35,14 +88,15 @@ export default class FilterMore extends Component<Props, State> {
    */
   renderFilters(data: any) {
     // 高亮类名： styles.tagActive
+    const { selectValues } = this.state;
 
     return data.map((item: any) => {
-      console.log(item);
+      const isSelect = selectValues.find((item1) => item1 === item.value);
 
       return (
         <span
           key={item.value}
-          className={["tag"].join(" ")}
+          className={["tag", isSelect ? "tagActive" : ""].join(" ")}
           onClick={() => {
             this.onTagClick(item.value);
           }}
@@ -54,12 +108,23 @@ export default class FilterMore extends Component<Props, State> {
   }
 
   render() {
-    const { roomType, oriented, floor, characteristic } = this.props.data;
+    const {
+      type,
+      onPickerClose,
+      onSave,
+      data: { roomType, oriented, floor, characteristic },
+    } = this.props;
+    const { selectValues } = this.state;
 
     return (
       <div className="filter_more_main">
         {/* 遮罩层 */}
-        <div className="mask" />
+        <div
+          className="mask"
+          onClick={() => {
+            onPickerClose(type);
+          }}
+        />
 
         {/* 条件内容 */}
         <div className="tags">
@@ -79,7 +144,14 @@ export default class FilterMore extends Component<Props, State> {
         </div>
 
         {/* 底部按钮 */}
-        <FilterFooter className="footer" />
+        <FilterFooter
+          cancelText={this.state.clearTextStatus}
+          onCancel={this.onClear}
+          className="footer"
+          onOk={() => {
+            onSave(type, selectValues);
+          }}
+        />
       </div>
     );
   }
