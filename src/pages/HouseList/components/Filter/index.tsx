@@ -6,8 +6,12 @@ import FilterMore from "../FilterMore";
 
 import "./index.scss";
 import { getCondition } from "@/api/houseList";
+import { getCurrentCity } from "@/utils";
 
-type Props = {};
+type Props = {
+  onFilter: (filters: { [key: string]: string }) => void;
+};
+
 type State = {
   titleSelectedStatus: TitleSelectedStatus;
   selectedValues: SelectedValues;
@@ -59,7 +63,7 @@ class Filter extends Component<Props, State> {
    * @description 获取筛选条件
    */
   async getHousesCondition() {
-    const { value } = JSON.parse(localStorage.getItem("BH_CITY") as string);
+    const { value } = await getCurrentCity();
     const res = await getCondition(value);
 
     this.setState({
@@ -175,6 +179,36 @@ class Filter extends Component<Props, State> {
         [type]: value,
       },
     });
+
+    let newSelectedValues: SelectedValues = {
+      ...this.state.selectedValues,
+      [type]: value,
+    };
+
+    console.log(newSelectedValues);
+
+    const { area, mode, price, more } = newSelectedValues;
+
+    let filters: any = {};
+
+    // 区域
+    const areaKey = area[0];
+    let areaValue = "null";
+    if (area.length === 3) {
+      areaValue = area[2] !== "null" ? area[2] : area[1];
+    }
+    filters[areaKey] = areaValue;
+
+    // 方式
+    filters.mode = mode[0];
+
+    // 租金
+    filters.price = price[0];
+
+    // 更多
+    filters.more = more.join(",");
+
+    this.props.onFilter(filters);
   };
 
   /**
