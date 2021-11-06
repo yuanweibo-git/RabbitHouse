@@ -1,6 +1,6 @@
 import { getCityName } from "@/api/searchHeader";
 
-function getCurrentCity() {
+function getCurrentCity(): any {
   const location = JSON.parse(localStorage.getItem("BH_CITY") as string);
   if (!location) {
     return new Promise((resolve, reject) => {

@@ -3,6 +3,7 @@ import { Carousel, Flex, Grid, WingBlank } from "antd-mobile";
 import { RouteComponentProps } from "react-router-dom";
 import { getSwipers, getGroups, getNews } from "@/api/dashboard";
 import { BASE_URL } from "@/utils/url";
+import { getCurrentCity } from "@/utils";
 
 import SearchHeader from "@/components/SeachHeader";
 
@@ -49,8 +50,6 @@ interface State {
   isSwpiersReady: boolean;
 }
 
-const cityInfo = JSON.parse(localStorage.getItem("BH_CITY") as string);
-
 const navs: Navs[] = [
   {
     id: 1,
@@ -79,6 +78,8 @@ const navs: Navs[] = [
 ];
 
 class Dashboard extends Component<Props, State> {
+  private cityInfo: { [key in string]: string };
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -87,6 +88,8 @@ class Dashboard extends Component<Props, State> {
       isSwpiersReady: false,
       groups: [],
     };
+
+    this.cityInfo = {};
   }
 
   /**
@@ -139,9 +142,10 @@ class Dashboard extends Component<Props, State> {
   }
 
   async componentWillMount() {
+    this.cityInfo = await getCurrentCity();
     const swipers = await getSwipers();
-    const groups = await getGroups(cityInfo.value);
-    const news = await getNews(cityInfo.value);
+    const groups = await getGroups(this.cityInfo.value);
+    const news = await getNews(this.cityInfo.value);
 
     this.setState({
       swipers: swipers.data.body,
@@ -164,7 +168,7 @@ class Dashboard extends Component<Props, State> {
             ""
           )}
 
-          <SearchHeader {...this.props} cityName={cityInfo.label} />
+          <SearchHeader {...this.props} cityName={this.cityInfo.label} />
         </div>
 
         {/*nav菜单*/}

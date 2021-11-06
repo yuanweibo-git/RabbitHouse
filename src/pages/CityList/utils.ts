@@ -29,7 +29,7 @@ export const formatCityList = (list: CityData[]) => {
   const cityList: CityListType = {};
 
   list.forEach((item) => {
-    let firstStr: string = item.short.substr(0, 1).toUpperCase();
+    let firstStr: any = item.short?.substr(0, 1).toUpperCase();
 
     if (!cityList[firstStr]) cityList[firstStr] = [item];
     else cityList[firstStr].push(item);

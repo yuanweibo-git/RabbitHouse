@@ -8,6 +8,7 @@ import { List, AutoSizer } from "react-virtualized";
 import NavHeader from "@/components/NavHeader";
 
 import { getCityHot, getCityList } from "@/api/cityList";
+import { getCurrentCity } from "@/utils";
 import "./index.scss";
 import {
   formatCityIndex,
@@ -16,12 +17,10 @@ import {
   NAME_HEIGHT,
 } from "./utils";
 
-import { getCityName } from "@/api/searchHeader";
-
 export type CityData = {
   label: string;
-  pinyin: string;
-  short: string;
+  pinyin?: string;
+  short?: string;
   value: string;
 };
 
@@ -69,12 +68,7 @@ class CityList extends Component<RouteComponentProps, State> {
     const { cityList, cityIndex } = formatCityList(allCityList);
     const { data } = await getCityHot();
 
-    new BMapGL.LocalCity().get(async (res: any) => {
-      const result = await getCityName(res.name);
-      localStorage.setItem("CURRENT_CITY", JSON.stringify(result.data.body));
-    });
-
-    const cityInfo = JSON.parse(localStorage.getItem("CURRENT_CITY") as string);
+    const cityInfo: CityData = await getCurrentCity();
 
     cityList["hot"] = data.body;
     cityList["#"] = [cityInfo];

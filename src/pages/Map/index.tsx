@@ -2,9 +2,10 @@ import React from "react";
 import { RouteComponentProps } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Icon, Toast } from "antd-mobile";
-import { BASE_URL } from "@/utils/url";
 
 import NavHeader from "@/components/NavHeader";
+import HouseItem from "@/components/HouseItem";
+import { getCurrentCity } from "@/utils";
 
 import "./index.scss";
 
@@ -17,7 +18,7 @@ type HouseItems = {
   value: string;
 };
 
-type HouseInfoItems = {
+export type HouseInfoItems = {
   desc: string;
   houseCode: string;
   houseImg: string;
@@ -55,14 +56,12 @@ class MapBox extends React.Component<Props, State> {
     };
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     this.initMap();
   }
 
-  initMap() {
-    const { label, value } = JSON.parse(
-      localStorage.getItem("BH_CITY") as string
-    );
+  async initMap() {
+    const { label, value } = await getCurrentCity();
 
     // 初始化地图
     this.map = new BMapGL.Map("container");
@@ -321,25 +320,7 @@ class MapBox extends React.Component<Props, State> {
           <div className="houseItems">
             {/* 房屋结构 */}
             {this.state.houseInfoList.map((item) => (
-              <div className="house" key={item.houseCode}>
-                <div className="imgWrap">
-                  <img className="img" src={BASE_URL + item.houseImg} alt="" />
-                </div>
-                <div className="content">
-                  <h3 className="title">{item.title}</h3>
-                  <div className="desc">{item.desc}</div>
-                  <div>
-                    {item.tags.map((tag) => (
-                      <span className="tag" key={tag}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="price">
-                    <span className="priceNum">{item.price}</span> 元/月
-                  </div>
-                </div>
-              </div>
+              <HouseItem data={item} key={item.houseCode} />
             ))}
           </div>
         </div>
