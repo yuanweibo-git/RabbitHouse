@@ -19,12 +19,18 @@ type State = {
 };
 
 export default class FilterMore extends Component<Props, State> {
+  private body: HTMLElement;
   constructor(props: Props) {
     super(props);
     this.state = {
       selectValues: this.props.defaultValue,
       clearTextStatus: this.props.defaultValue.length ? "清除" : "关闭",
     };
+    this.body = document.body;
+  }
+
+  componentDidMount() {
+    this.body.style.overflow = "hidden";
   }
 
   /**
@@ -105,6 +111,10 @@ export default class FilterMore extends Component<Props, State> {
         </span>
       );
     });
+  }
+
+  componentWillUnmount() {
+    this.body.style.overflow = "";
   }
 
   render() {

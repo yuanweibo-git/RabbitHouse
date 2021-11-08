@@ -18,11 +18,22 @@ type State = {
 };
 
 export default class FilterPicker extends Component<Props, State> {
+  private body: HTMLElement;
+
   constructor(props: Props) {
     super(props);
     this.state = {
       value: this.props.defaultValue,
     };
+    this.body = document.body;
+  }
+
+  componentDidMount() {
+    this.body.style.overflow = "hidden";
+  }
+
+  componentWillUnmount() {
+    this.body.style.overflow = "";
   }
 
   render() {

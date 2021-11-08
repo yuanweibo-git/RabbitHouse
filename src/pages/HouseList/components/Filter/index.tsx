@@ -209,6 +209,8 @@ class Filter extends Component<Props, State> {
     filters.more = more.join(",");
 
     this.props.onFilter(filters);
+
+    window.scroll(0, 0);
   };
 
   /**
