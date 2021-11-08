@@ -15,10 +15,9 @@ export default class HouseItem extends Component<Props> {
   renderTags = (tags: string[]) => {
     return (
       <div>
-        {tags.map((tag: any) => {
-          const random: number = Math.ceil(Math.random() * 3);
+        {tags.map((tag: any, index) => {
           return (
-            <span className={`tag tag${random}`} key={tag}>
+            <span className={`tag tag${index + 1}`} key={tag}>
               {tag}
             </span>
           );
