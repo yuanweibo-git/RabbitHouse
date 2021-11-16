@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 
+import { Spring, animated } from "react-spring";
+
 import FilterTitle from "../FilterTitle";
 import FilterPicker from "../FilterPicker";
 import FilterMore from "../FilterMore";
@@ -298,20 +300,37 @@ class Filter extends Component<Props, State> {
     );
   }
 
+  renderMask() {
+    const { openType } = this.state;
+
+    const isHide =
+      openType === "area" || openType === "mode" || openType === "price";
+
+    return (
+      <Spring from={{ opacity: 0 }} to={{ opacity: isHide ? 1 : 0 }}>
+        {(styles) => {
+          console.log(styles);
+          return (
+            <animated.div
+              style={styles}
+              className="mask"
+              onClick={() => {
+                this.onPickerClose(openType);
+              }}
+            />
+          );
+        }}
+      </Spring>
+    );
+  }
+
   render() {
-    const { titleSelectedStatus, openType } = this.state;
+    const { titleSelectedStatus } = this.state;
     return (
       <div className="filter_main">
         {/* 前三个菜单的遮罩层 */}
 
-        {openType === "area" || openType === "mode" || openType === "price" ? (
-          <div
-            className="mask"
-            onClick={() => {
-              this.onPickerClose(openType);
-            }}
-          />
-        ) : null}
+        {this.renderMask()}
 
         <div className="content">
           {/* 标题栏 */}
