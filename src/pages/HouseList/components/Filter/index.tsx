@@ -308,7 +308,7 @@ class Filter extends Component<Props, State> {
 
     return (
       <Spring from={{ opacity: 0 }} to={{ opacity: isHide ? 1 : 0 }}>
-        {(styles) => {
+        {(styles: any) => {
           console.log(styles);
           return (
             <animated.div
