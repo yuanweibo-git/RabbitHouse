@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-
+import { Spring, animated } from "react-spring";
 import FilterFooter from "@/components/FilterFooter";
 
 import "./index.scss";
@@ -129,39 +129,61 @@ export default class FilterMore extends Component<Props, State> {
     return (
       <div className="filter_more_main">
         {/* 遮罩层 */}
-        <div
-          className="mask"
-          onClick={() => {
-            onPickerClose(type);
+        <Spring from={{ opacity: 0 }} to={{ opacity: type === "more" ? 1 : 0 }}>
+          {(styles) => {
+            return (
+              <animated.div
+                style={styles}
+                className="mask"
+                onClick={() => {
+                  onPickerClose(type);
+                }}
+              />
+            );
           }}
-        />
+        </Spring>
 
         {/* 条件内容 */}
-        <div className="tags">
-          <dl className="dl">
-            <dt className="dt">户型</dt>
-            <dd className="dd">{this.renderFilters(roomType)}</dd>
+        <Spring
+          from={{ right: "-300px" }}
+          to={{ right: type === "more" ? "0px" : "-300px" }}
+        >
+          {(styles) => (
+            <animated.div style={styles} className="tags">
+              <dl className="dl">
+                <dt className="dt">户型</dt>
+                <dd className="dd">{this.renderFilters(roomType)}</dd>
 
-            <dt className="dt">朝向</dt>
-            <dd className="dd">{this.renderFilters(oriented)}</dd>
+                <dt className="dt">朝向</dt>
+                <dd className="dd">{this.renderFilters(oriented)}</dd>
 
-            <dt className="dt">楼层</dt>
-            <dd className="dd">{this.renderFilters(floor)}</dd>
+                <dt className="dt">楼层</dt>
+                <dd className="dd">{this.renderFilters(floor)}</dd>
 
-            <dt className="dt">房屋亮点</dt>
-            <dd className="dd">{this.renderFilters(characteristic)}</dd>
-          </dl>
-        </div>
+                <dt className="dt">房屋亮点</dt>
+                <dd className="dd">{this.renderFilters(characteristic)}</dd>
+              </dl>
+            </animated.div>
+          )}
+        </Spring>
 
         {/* 底部按钮 */}
-        <FilterFooter
-          cancelText={this.state.clearTextStatus}
-          onCancel={this.onClear}
-          className="footer"
-          onOk={() => {
-            onSave(type, selectValues);
-          }}
-        />
+        <Spring
+          from={{ right: "-300px" }}
+          to={{ right: type === "more" ? "0px" : "-300px" }}
+        >
+          {(styles) => (
+            <animated.div style={styles} className="footer">
+              <FilterFooter
+                cancelText={this.state.clearTextStatus}
+                onCancel={this.onClear}
+                onOk={() => {
+                  onSave(type, selectValues);
+                }}
+              />
+            </animated.div>
+          )}
+        </Spring>
       </div>
     );
   }

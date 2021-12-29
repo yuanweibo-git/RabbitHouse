@@ -303,13 +303,16 @@ class Filter extends Component<Props, State> {
   renderMask() {
     const { openType } = this.state;
 
-    const isHide =
+    const isShow =
       openType === "area" || openType === "mode" || openType === "price";
 
     return (
-      <Spring from={{ opacity: 0 }} to={{ opacity: isHide ? 1 : 0 }}>
-        {(styles: any) => {
-          console.log(styles);
+      <Spring from={{ opacity: 0 }} to={{ opacity: isShow ? 1 : 0 }}>
+        {(styles) => {
+          if (!isShow) {
+            return <animated.div style={styles} />;
+          }
+
           return (
             <animated.div
               style={styles}
